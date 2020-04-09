@@ -61,8 +61,9 @@
 
     // Download the data
     myConnector.getData = function(table, doneCallback) {
-
+        
         var outages = new Array();
+        var xhttp = null;
 
         const proxyurl = "https://cors-anywhere.herokuapp.com/";
         const url = ["http://reports.ieso.ca/public/TxOutagesTodayAll/PUB_TxOutagesTodayAll.xml",
@@ -74,51 +75,63 @@
         for (var k = 0; k < url.length; k++) {
 
 
-            fetch(proxyurl + url[k]) // https://cors-anywhere.herokuapp.com/https://example.com
-                .then(response => response.text())
-                .then(contents => {
+            var x = new XMLHttpRequest();
+            x.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
 
-                    parser = new DOMParser();
-                    xmlDoc = parser.parseFromString(contents, "text/xml");
+                    setTimeout(function () {
 
-                    var temp = xmlDoc.getElementsByTagName("OutageRequest");
+                        // document is ready:
+                        xhttp = x.responseText;
 
-                    var i;
+                        parser = new DOMParser();
+                        xmlDoc = parser.parseFromString(xhttp, "text/xml");
 
-                    for (i = 0; i < temp.length; i++) {
+                        var temp = xmlDoc.getElementsByTagName("OutageRequest");
 
-                        var outage = {
+                        var i;
 
-                            outageID: temp[i].querySelector("OutageID").innerHTML,
-                            plannedStart: temp[i].querySelector("PlannedStart").innerHTML,
-                            plannedEnd: temp[i].querySelector("PlannedEnd").innerHTML,
-                            priority: temp[i].querySelector("Priority").innerHTML,
-                            recurrence: temp[i].querySelector("Recurrence").innerHTML,
-                            recallTime: temp[i].querySelector("EquipmentRecallTime").innerHTML,
-                            status: temp[i].querySelector("OutageRequestStatus").innerHTML,
-                            equipmentname: null,
-                            equipmenttype: null,
-                            equipmentvoltage: null,
-                            constrainttype: null
+                        for (i = 0; i < temp.length; i++) {
+
+
+                            var outage = {
+
+                                outageID: temp[i].querySelector("OutageID").innerHTML,
+                                plannedStart: temp[i].querySelector("PlannedStart").innerHTML,
+                                plannedEnd: temp[i].querySelector("PlannedEnd").innerHTML,
+                                priority: temp[i].querySelector("Priority").innerHTML,
+                                recurrence: temp[i].querySelector("Recurrence").innerHTML,
+                                recallTime: temp[i].querySelector("EquipmentRecallTime").innerHTML,
+                                status: temp[i].querySelector("OutageRequestStatus").innerHTML,
+                                equipmentname: null,
+                                equipmenttype: null,
+                                equipmentvoltage: null,
+                                constrainttype: null
+                            };
+
+                            var equipment = temp[i].querySelectorAll("EquipmentRequested");
+
+                            var j;
+
+                            for (j = 0; j < equipment.length; j++) {
+
+                                var obj = Object.assign({}, outage);
+                                obj.equipmentname = equipment[j].children[0].innerHTML;
+                                obj.equipmenttype = equipment[j].children[1].innerHTML;
+                                obj.equipmentvoltage = equipment[j].children[2].innerHTML;
+                                obj.constrainttype = equipment[j].children[3].innerHTML;
+                                outages.push(obj);
+                            };
                         };
+                        outages = [... new Set(outages)];
 
-                        var equipment = temp[i].querySelectorAll("EquipmentRequested");
 
-                        var j;
+                    }, 1000);
 
-                        for (j = 0; j < equipment.length; j++) {
-
-                            var obj = Object.assign({}, outage);
-                            obj.equipmentname = equipment[j].children[0].innerHTML;
-                            obj.equipmenttype = equipment[j].children[1].innerHTML;
-                            obj.equipmentvoltage = equipment[j].children[2].innerHTML;
-                            obj.constrainttype = equipment[j].children[3].innerHTML;
-                            outages.push(obj);
-                        };
-                    };
-                    outages = [... new Set(outages)];
-
-                });
+                }
+            };
+            x.open('GET', proxyurl + url[k]);
+            x.send();
 
         };
 
@@ -127,7 +140,7 @@
             table.appendRows(outages);
             doneCallback();
 
-        }, 4000);
+        }, 3000);
 
     };
 
