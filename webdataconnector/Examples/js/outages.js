@@ -5,24 +5,54 @@
     // Define the schema
     myConnector.getSchema = function(schemaCallback) {
         var cols = [{
-            id: "id",
+            id: "outageID",
+            alias: "Outage ID",
             dataType: tableau.dataTypeEnum.string
         }, {
-            id: "mag",
-            alias: "magnitude",
-            dataType: tableau.dataTypeEnum.float
+            id: "plannedStart",
+            alias: "Planned Start",
+            dataType: tableau.dataTypeEnum.datetime
         }, {
-            id: "title",
-            alias: "title",
+            id: "plannedEnd",
+            alias: "Planned End",
+            dataType: tableau.dataTypeEnum.datetime
+        }, {
+            id: "priority",
+            alias: "Priority",
             dataType: tableau.dataTypeEnum.string
         }, {
-            id: "location",
-            dataType: tableau.dataTypeEnum.geometry
+            id: "recurrence",
+            alias: "Recurrence",
+            dataType: tableau.dataTypeEnum.string
+        }, {
+            id: "recallTime",
+            alias: "Recall Time",
+            dataType: tableau.dataTypeEnum.string
+        }, {
+            id: "status",
+            alias: "Status",
+            dataType: tableau.dataTypeEnum.string
+        }, {
+            id: "equipmentname",
+            alias: "Equipment Name",
+            dataType: tableau.dataTypeEnum.string
+        }, {
+            id: "equipmenttype",
+            alias: "Equipment Type",
+            dataType: tableau.dataTypeEnum.string
+        }, {
+            id: "equipmentvoltage",
+            alias: "Equipment Voltage",
+            dataType: tableau.dataTypeEnum.string
+        }, {
+            id: "constrainttype",
+            alias: "Equipment Constraint",
+            dataType: tableau.dataTypeEnum.string
         }];
 
         var tableSchema = {
-            id: "earthquakeFeed",
-            alias: "Earthquakes with magnitude greater than 4.5 in the last seven days",
+            id: "outages",
+            alias: "All IESO Transmission Outages",
             columns: cols
         };
 
@@ -31,23 +61,78 @@
 
     // Download the data
     myConnector.getData = function(table, doneCallback) {
-        $.getJSON("https://cors-anywhere.herokuapp.com/https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson", function(resp) {
-            var feat = resp.features,
-                tableData = [];
+        
+        var outages = new Array();
+        var xhttp = null;
 
-            // Iterate over the JSON object
-            for (var i = 0, len = feat.length; i < len; i++) {
-                tableData.push({
-                    "id": feat[i].id,
-                    "mag": feat[i].properties.mag,
-                    "title": feat[i].properties.title,
-                    "location": feat[i].geometry
-                });
-            }
+        const proxyurl = "https://cors-anywhere.herokuapp.com/";
+        const url = ["http://reports.ieso.ca/public/TxOutagesTodayAll/PUB_TxOutagesTodayAll.xml",
+            "http://reports.ieso.ca/public/TxOutages1to30DaysPlanned/PUB_TxOutages1to30DaysPlanned.xml",
+            "http://reports.ieso.ca/public/TxOutages31to90DaysPlanned/PUB_TxOutages31to90DaysPlanned.xml",
+            "http://reports.ieso.ca/public/TxOutages91to180DaysPlanned/PUB_TxOutages91to180DaysPlanned.xml",
+            "http://reports.ieso.ca/public/TxOutages181to730DaysPlanned/PUB_TxOutages181to730DaysPlanned.xml"]; // site that doesn’t send Access-Control-*
 
-            table.appendRows(tableData);
-            doneCallback();
-        });
+        for (var k = 0; k < url.length; k++) {
+
+
+            var x = new XMLHttpRequest();
+            x.onload = function () {
+                if (this.readyState == 4 && this.status == 200) {
+
+                    // document is ready:
+                    xhttp = x.responseText;
+
+                    parser = new DOMParser();
+                    xmlDoc = parser.parseFromString(xhttp, "text/xml");
+
+                    var temp = xmlDoc.getElementsByTagName("OutageRequest");
+
+                    var i;
+
+                    for (i = 0; i < temp.length; i++) {
+
+
+                        var outage = {
+
+                            outageID: temp[i].querySelector("OutageID").innerHTML,
+                            plannedStart: temp[i].querySelector("PlannedStart").innerHTML,
+                            plannedEnd: temp[i].querySelector("PlannedEnd").innerHTML,
+                            priority: temp[i].querySelector("Priority").innerHTML,
+                            recurrence: temp[i].querySelector("Recurrence").innerHTML,
+                            recallTime: temp[i].querySelector("EquipmentRecallTime").innerHTML,
+                            status: temp[i].querySelector("OutageRequestStatus").innerHTML,
+                            equipmentname: null,
+                            equipmenttype: null,
+                            equipmentvoltage: null,
+                            constrainttype: null
+                        };
+
+                        var equipment = temp[i].querySelectorAll("EquipmentRequested");
+
+                        var j;
+
+                        for (j = 0; j < equipment.length; j++) {
+
+                            var obj = Object.assign({}, outage);
+                            obj.equipmentname = equipment[j].children[0].innerHTML;
+                            obj.equipmenttype = equipment[j].children[1].innerHTML;
+                            obj.equipmentvoltage = equipment[j].children[2].innerHTML;
+                            obj.constrainttype = equipment[j].children[3].innerHTML;
+                            outages.push(obj);
+                        };
+                    };
+                    outages = [... new Set(outages)];
+                };
+
+            };
+            
+            x.open('GET', proxyurl + url[k]);
+            x.send();
+
+        };
+
+        table.appendRows(outages);
+        doneCallback();
     };
 
     tableau.registerConnector(myConnector);
@@ -55,7 +140,7 @@
     // Create event listeners for when the user submits the form
     $(document).ready(function() {
         $("#submitButton").click(function() {
-            tableau.connectionName = "USGS Earthquake Feed"; // This will be the data source name in Tableau
+            tableau.connectionName = "IESO Transmisson Outage Reports"; // This will be the data source name in Tableau
             tableau.submit(); // This sends the connector object to Tableau
         });
     });
