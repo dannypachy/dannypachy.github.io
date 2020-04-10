@@ -1,15 +1,14 @@
-"use strict";
-
 (function () {
     // Create the connector object
-    var myConnector = tableau.makeConnector(); // Init function for connector, called during every phase
+    var myConnector = tableau.makeConnector();
 
+    // Init function for connector, called during every phase
     myConnector.init = function (initCallback) {
         tableau.authType = tableau.authTypeEnum.none;
         initCallback();
-    }; // Define the schema
+    }
 
-
+    // Define the schema
     myConnector.getSchema = function (schemaCallback) {
         var cols = [{
             id: "outageID",
@@ -56,35 +55,51 @@
             alias: "Equipment Constraint",
             dataType: tableau.dataTypeEnum.string
         }];
+
         var tableSchema = {
             id: "outages",
             alias: "All IESO Transmission Outages",
             columns: cols
         };
+
         schemaCallback([tableSchema]);
-    }; // Download the data
+    };
 
-
+    // Download the data
     myConnector.getData = function (table, doneCallback) {
+
         var outages = new Array();
         var xhttp = null;
-        var proxyurl = "https://cors-anywhere.herokuapp.com/";
-        var url = ["http://reports.ieso.ca/public/TxOutagesTodayAll/PUB_TxOutagesTodayAll.xml", "http://reports.ieso.ca/public/TxOutages1to30DaysPlanned/PUB_TxOutages1to30DaysPlanned.xml", "http://reports.ieso.ca/public/TxOutages31to90DaysPlanned/PUB_TxOutages31to90DaysPlanned.xml", "http://reports.ieso.ca/public/TxOutages91to180DaysPlanned/PUB_TxOutages91to180DaysPlanned.xml", "http://reports.ieso.ca/public/TxOutages181to730DaysPlanned/PUB_TxOutages181to730DaysPlanned.xml"]; // site that doesn’t send Access-Control-*
+
+        const proxyurl = "https://cors-anywhere.herokuapp.com/";
+        const url = ["http://reports.ieso.ca/public/TxOutagesTodayAll/PUB_TxOutagesTodayAll.xml",
+            "http://reports.ieso.ca/public/TxOutages1to30DaysPlanned/PUB_TxOutages1to30DaysPlanned.xml",
+            "http://reports.ieso.ca/public/TxOutages31to90DaysPlanned/PUB_TxOutages31to90DaysPlanned.xml",
+            "http://reports.ieso.ca/public/TxOutages91to180DaysPlanned/PUB_TxOutages91to180DaysPlanned.xml",
+            "http://reports.ieso.ca/public/TxOutages181to730DaysPlanned/PUB_TxOutages181to730DaysPlanned.xml"]; // site that doesn’t send Access-Control-*
 
         for (var k = 0; k < url.length; k++) {
-            var x = new XMLHttpRequest();
 
+
+            var x = new XMLHttpRequest();
             x.onloadend = function () {
                 if (this.readyState == 4 && this.status == 200) {
+
                     // document is ready:
                     xhttp = x.responseText;
+
                     parser = new DOMParser();
                     xmlDoc = parser.parseFromString(xhttp, "text/xml");
+
                     var temp = xmlDoc.getElementsByTagName("OutageRequest");
+
                     var i;
 
                     for (i = 0; i < temp.length; i++) {
+
+
                         var outage = {
+
                             outageID: temp[i].querySelector("OutageID").innerHTML,
                             plannedStart: temp[i].querySelector("PlannedStart").innerHTML,
                             plannedEnd: temp[i].querySelector("PlannedEnd").innerHTML,
@@ -97,42 +112,41 @@
                             equipmentvoltage: null,
                             constrainttype: null
                         };
+
                         var equipment = temp[i].querySelectorAll("EquipmentRequested");
+
                         var j;
 
                         for (j = 0; j < equipment.length; j++) {
+
                             var obj = Object.assign({}, outage);
                             obj.equipmentname = equipment[j].children[0].innerHTML;
                             obj.equipmenttype = equipment[j].children[1].innerHTML;
                             obj.equipmentvoltage = equipment[j].children[2].innerHTML;
                             obj.constrainttype = equipment[j].children[3].innerHTML;
                             outages.push(obj);
-                        }
+                        };
+                    };
+                    //outages = [... new Set(outages)];
+                };
 
-                        ;
-                    }
-
-                    ;
-                }
-
-                ;
             };
 
             x.open('GET', proxyurl + url[k], false);
             x.send();
-        }
 
-        ;
+        };
+
         table.appendRows(outages);
         doneCallback();
     };
 
-    tableau.registerConnector(myConnector); // Create event listeners for when the user submits the form
+    tableau.registerConnector(myConnector);
 
+    // Create event listeners for when the user submits the form
     $(document).ready(function () {
         $("#submitButton").click(function () {
             tableau.connectionName = "IESO Transmisson Outage Reports"; // This will be the data source name in Tableau
-
             tableau.submit(); // This sends the connector object to Tableau
         });
     });
