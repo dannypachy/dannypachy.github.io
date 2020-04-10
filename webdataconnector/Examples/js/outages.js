@@ -127,6 +127,16 @@
                             outages.push(obj);
                         };
                     };
+                    var result = outages.reduce(function (memo, e1) {
+                        var matches = memo.filter(function (e2) {
+                            return e1.outageID == e2.outageID && e1.equipmentname == e2.equipmentname
+                        })
+                        if (matches.length == 0)
+                            memo.push(e1)
+                        return memo;
+                    }, [])
+
+                    outages = result;
                     //outages = [... new Set(outages)];
                 };
 
