@@ -120,10 +120,10 @@
                         for (j = 0; j < equipment.length; j++) {
 
                             var obj = $.extend({}, outage);
-                            obj.equipmentname = $(equipment[j]).children("equipmentname").textContent;
-                            obj.equipmenttype = $(equipment[j]).children("equipmenttype").textContent;
-                            obj.equipmentvoltage = $(equipment[j]).children("equipmentvoltage").textContent;
-                            obj.constrainttype = $(equipment[j]).children("constrainttype").textContent;
+                            obj.equipmentname = $(equipment[j]).children("equipmentname")[0].textContent;
+                            obj.equipmenttype = $(equipment[j]).children("equipmenttype")[0].textContent;
+                            obj.equipmentvoltage = $(equipment[j]).children("equipmentvoltage")[0].textContent;
+                            obj.constrainttype = $(equipment[j]).children("constrainttype")[0].textContent;
                             outages.push(obj);
                         };
                     };
