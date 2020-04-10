@@ -119,8 +119,7 @@
 
                         for (j = 0; j < equipment.length; j++) {
 
-                            var temp = {};
-                            var obj = Object.assign(temp, outage);
+                            var obj = $.extend({},outage);
                             obj.equipmentname = equipment[j].children[0].innerHTML;
                             obj.equipmenttype = equipment[j].children[1].innerHTML;
                             obj.equipmentvoltage = equipment[j].children[2].innerHTML;
