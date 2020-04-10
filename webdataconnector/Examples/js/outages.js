@@ -76,7 +76,7 @@
 
 
             var x = new XMLHttpRequest();
-            x.onload = function () {
+            x.onloadend = function () {
                 if (this.readyState == 4 && this.status == 200) {
 
                     // document is ready:
