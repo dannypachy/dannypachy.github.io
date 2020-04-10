@@ -100,7 +100,7 @@
 
                         var outage = {
 
-                            outageID: temp[i].querySelector("OutageID").innerHTML,
+                            outageID: $(temp[i]).children("OutageID")[0].textContent,
                             plannedStart: temp[i].querySelector("PlannedStart").innerHTML,
                             plannedEnd: temp[i].querySelector("PlannedEnd").innerHTML,
                             priority: temp[i].querySelector("Priority").innerHTML,
