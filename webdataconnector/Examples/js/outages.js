@@ -101,19 +101,19 @@
                         var outage = {
 
                             outageID: $(temp[i]).children("OutageID")[0].textContent,
-                            plannedStart: temp[i].querySelector("PlannedStart").innerHTML,
-                            plannedEnd: temp[i].querySelector("PlannedEnd").innerHTML,
-                            priority: temp[i].querySelector("Priority").innerHTML,
-                            recurrence: temp[i].querySelector("Recurrence").innerHTML,
-                            recallTime: temp[i].querySelector("EquipmentRecallTime").innerHTML,
-                            status: temp[i].querySelector("OutageRequestStatus").innerHTML,
+                            plannedStart: $(temp[i]).children("PlannedStart")[0].textContent,
+                            plannedEnd: $(temp[i]).children("PlannedEnd")[0].textContent,
+                            priority: $(temp[i]).children("Priority")[0].textContent,
+                            recurrence: $(temp[i]).children("Recurrence")[0].textContent,
+                            recallTime: $(temp[i]).children("EquipmentRecallTime")[0].textContent,
+                            status: $(temp[i]).children("OutageRequestStatus")[0].textContent,
                             equipmentname: null,
                             equipmenttype: null,
                             equipmentvoltage: null,
                             constrainttype: null
                         };
 
-                        var equipment = temp[i].querySelectorAll("EquipmentRequested");
+                        var equipment = $(temp[i]).children("EquipmentRequested");
 
                         var j;
 
