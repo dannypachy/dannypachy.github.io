@@ -127,7 +127,7 @@
                             outages.push(obj);
                         };
                     };
-                    outages = [... new Set(outages)];
+                    //outages = [... new Set(outages)];
                 };
 
             };
