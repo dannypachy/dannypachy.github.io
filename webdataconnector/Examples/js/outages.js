@@ -126,7 +126,7 @@
 
             };
             
-            x.open('GET', proxyurl + url[k]);
+            x.open('GET', proxyurl + url[k], false);
             x.send();
 
         };
