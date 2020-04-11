@@ -83,8 +83,27 @@
         var outages = new Array();
         var xhttp = null;
 
+        //Get today's date formatted
         var d = new Date();
-        var d_str = d.toISOString();
+
+        var year = d.getFullYear();
+
+        var month = "0" + (d.getMonth() + 1);
+        month = month.substring(month.length - 2, month.length);
+
+        var day = "0" + d.getDate();
+        day = day.substring(day.length - 2, day.length);
+
+        var hour = "0" + d.getHours();
+        hour = hour.substring(hour.length - 2, hour.length);
+
+        var min = "0" + d.getMinutes();
+        min = min.substring(min.length - 2, min.length);
+
+        var sec = "0" + d.getSeconds();
+        sec = sec.substring(sec.length - 2, sec.length);
+
+        var dateformat = year + "-" + month + "-" + day + "T" + hour + ":" + min + ":" + sec;
 
         const proxyurl = "https://cors-anywhere.herokuapp.com/";
         const url = ["http://reports.ieso.ca/public/TxOutagesTodayAll/PUB_TxOutagesTodayAll.xml",
@@ -133,7 +152,7 @@
                         };
 
                         //Set timestamp
-                        outage.timestamp = d_str;
+                        outage.timestamp = dateformat;
 
                         //Duration Calculation
                         var sd = new Date(outage.plannedStart);
