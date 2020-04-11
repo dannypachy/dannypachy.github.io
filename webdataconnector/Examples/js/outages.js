@@ -23,6 +23,10 @@
             alias: "Planned End",
             dataType: tableau.dataTypeEnum.datetime
         }, {
+            id: "duration",
+            alias: "Duration",
+            dataType: tableau.dataTypeEnum.float
+        }, {
             id: "priority",
             alias: "Priority",
             dataType: tableau.dataTypeEnum.string
@@ -107,6 +111,7 @@
                             outageID: $(temp[i]).children("OutageID")[0].textContent,
                             plannedStart: $(temp[i]).children("PlannedStart")[0].textContent,
                             plannedEnd: $(temp[i]).children("PlannedEnd")[0].textContent,
+                            duration: null,
                             priority: $(temp[i]).children("Priority")[0].textContent,
                             recurrence: $(temp[i]).children("Recurrence")[0].textContent,
                             recallTime: $(temp[i]).children("EquipmentRecallTime")[0].textContent,
@@ -117,6 +122,10 @@
                             constrainttype: null,
                             station: null
                         };
+
+                        var sd = new Date(outage.plannedStart);
+                        var ed = new Date(outage.plannedEnd);
+                        outage.duration = (ed - sd)/(24*3600*1000);
 
                         var equipment = $(temp[i]).children("EquipmentRequested");
 
