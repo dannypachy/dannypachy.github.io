@@ -129,8 +129,11 @@
                             equipmentvoltage: null,
                             constrainttype: null,
                             station: null,
-                            timestamp: d_str
+                            timestamp: null
                         };
+
+                        //Set timestamp
+                        outage.timestamp = d_str;
 
                         //Duration Calculation
                         var sd = new Date(outage.plannedStart);
