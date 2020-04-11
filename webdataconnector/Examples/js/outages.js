@@ -138,7 +138,7 @@
                             } else {
                                 obj.station = array1[0];
 
-                                if (obj.station.includes("MANBY")) {
+                                if (obj.station == "MANBY EAST TS" || obj.station == "MANBY WEST TS") {
 
                                     obj.station = "MANBY TS";
 
