@@ -88,7 +88,7 @@
 
         for (var k = 0; k < url.length; k++) {
 
-
+            //XHR
             var x = new XMLHttpRequest();
             x.onloadend = function () {
                 if (this.readyState == 4 && this.status == 200) {
@@ -96,6 +96,7 @@
                     // document is ready:
                     xhttp = x.responseText;
 
+                    //Format to object
                     parser = new DOMParser();
                     xmlDoc = parser.parseFromString(xhttp, "text/xml");
 
@@ -105,7 +106,7 @@
 
                     for (i = 0; i < temp.length; i++) {
 
-
+                        //Setup outage object
                         var outage = {
 
                             outageID: $(temp[i]).children("OutageID")[0].textContent,
@@ -123,14 +124,39 @@
                             station: null
                         };
 
+                        //Duration Calculation
                         var sd = new Date(outage.plannedStart);
                         var ed = new Date(outage.plannedEnd);
-                        outage.duration = (ed - sd)/(24*3600*1000);
+                        outage.duration = (ed - sd) / (24 * 3600 * 1000);
 
+                        //Switch for Priority
+                        switch (outage.priority) {
+                            case "P":
+                                outage.priority = "Planned";
+                                break;
+                            case "O":
+                                outage.priority = "Opportunity";
+                                break;
+                            case "U":
+                                outage.priority = "Urgent";
+                                break;
+                            case "F":
+                                outage.priority = "Forced";
+                                break;
+                            case "FE":
+                                outage.priority = "Forced Extended";
+                                break;
+                            case "I":
+                                outage.priority = "Informational";
+                                break;
+                        }
+
+                        //Get equipment
                         var equipment = $(temp[i]).children("EquipmentRequested");
 
                         var j;
 
+                        //Define equipment parameters
                         for (j = 0; j < equipment.length; j++) {
 
                             var obj = $.extend({}, outage);
@@ -139,9 +165,11 @@
                             obj.equipmentvoltage = $(equipment[j]).children("equipmentvoltage")[0].textContent;
                             obj.constrainttype = $(equipment[j]).children("constrainttype")[0].textContent;
 
+                            //RegEx for station
                             var re = /((ST. )*(\w+\s|\d+\s)+TS)|((ST. )*(\w+\s|\d+\s)+SS)|((ST. )*(\w+\s|\d+\s)+GS)/g;
                             var array1 = re.exec(obj.equipmentname);
 
+                            //Assignment & special case for Manby TS
                             if (array1 == null) {
                                 obj.station = null;
                             } else {
@@ -153,10 +181,12 @@
 
                                 };
                             };
-                            
+
+                            //Push obj to outages array
                             outages.push(obj);
                         };
                     };
+                    //Filter out duplicates
                     var result = outages.reduce(function (memo, e1) {
                         var matches = memo.filter(function (e2) {
                             return e1.outageID == e2.outageID && e1.equipmentname == e2.equipmentname
