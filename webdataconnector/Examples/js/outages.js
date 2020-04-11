@@ -62,6 +62,10 @@
             id: "station",
             alias: "Station",
             dataType: tableau.dataTypeEnum.string
+        }, {
+            id: "timestamp",
+            alias: "Date Retrieved",
+            dataType: tableau.dataTypeEnum.datetime
         }];
 
         var tableSchema = {
@@ -78,6 +82,9 @@
 
         var outages = new Array();
         var xhttp = null;
+
+        var d = new Date();
+        var d_str = d.toISOString();
 
         const proxyurl = "https://cors-anywhere.herokuapp.com/";
         const url = ["http://reports.ieso.ca/public/TxOutagesTodayAll/PUB_TxOutagesTodayAll.xml",
@@ -121,7 +128,8 @@
                             equipmenttype: null,
                             equipmentvoltage: null,
                             constrainttype: null,
-                            station: null
+                            station: null,
+                            timestamp: d_str
                         };
 
                         //Duration Calculation
@@ -151,6 +159,59 @@
                                 break;
                         }
 
+                        //Switch for Recurrence
+                        switch (outage.recurrence) {
+                            case "C":
+                                outage.recurrence = "Continuous";
+                                break;
+                            case "NC":
+                                outage.recurrence = "Non-continuous";
+                                break;
+                            case "RE":
+                                outage.recurrence = "Return Evenings";
+                                break;
+                            case "RSS":
+                                outage.recurrence = "Return Sat – Sun";
+                                break;
+                            case "RSM":
+                                outage.recurrence = "Return Sat – Mon";
+                                break;
+                            case "RFS":
+                                outage.recurrence = "Return Fri – Sun";
+                                break;
+                            case "RFM":
+                                outage.recurrence = "Return Fri – Mon";
+                                break;
+                            case "REW":
+                                outage.recurrence = "Return Evenings and Weekends (Sat-Sun)";
+                                break;
+                        }
+
+                        //Switch for Status
+                        switch (outage.status) {
+                            case "SUB":
+                                outage.status = "Submitted";
+                                break;
+                            case "STDY":
+                                outage.status = "Study";
+                                break;
+                            case "NEG":
+                                outage.status = "Negotiate";
+                                break;
+                            case "AA":
+                                outage.status = "Advance Approved";
+                                break;
+                            case "RISK":
+                                outage.status = "At Risk";
+                                break;
+                            case "FA":
+                                outage.status = "Final Approved";
+                                break;
+                            case "IMPL":
+                                outage.status = "Implemented";
+                                break;
+                        }
+
                         //Get equipment
                         var equipment = $(temp[i]).children("EquipmentRequested");
 
@@ -164,6 +225,46 @@
                             obj.equipmenttype = $(equipment[j]).children("equipmenttype")[0].textContent;
                             obj.equipmentvoltage = $(equipment[j]).children("equipmentvoltage")[0].textContent;
                             obj.constrainttype = $(equipment[j]).children("constrainttype")[0].textContent;
+
+                            //Switch for Constraint
+                            switch (obj.constrainttype) {
+                                case "OOS":
+                                    obj.constrainttype = "Out of Service";
+                                    break;
+                                case "IS":
+                                    obj.constrainttype = "In Service";
+                                    break;
+                                case "DRATE":
+                                    obj.constrainttype = "Derated To";
+                                    break;
+                                case "MUSTRUN":
+                                    obj.constrainttype = "Must Run At";
+                                    break;
+                                case "HOLDOFF":
+                                    obj.constrainttype = "Holdoff";
+                                    break;
+                                case "AVR/PSS OOS":
+                                    obj.constrainttype = "Automatic Voltage Regulator/Power System Stabilizer Out of Service";
+                                    break;
+                                case "ASP OOS":
+                                    obj.constrainttype = "Ancillary Service Out of Service";
+                                    break;
+                                case "PROT OOS":
+                                    obj.constrainttype = "Protection Out of Service";
+                                    break;
+                                case "BF PROT OOS":
+                                    obj.constrainttype = "Breaker Failure Protection Out of Service";
+                                    break;
+                                case "BTCT":
+                                    obj.constrainttype = "Breaker Trip Coil Test";
+                                    break;
+                                case "INFO":
+                                    obj.constrainttype = "Information";
+                                    break;
+                                case "ABNO":
+                                    obj.constrainttype = "Available But Not Operating";
+                                    break;
+                            }
 
                             //RegEx for station
                             var re = /((ST. )*(\w+\s|\d+\s)+TS)|((ST. )*(\w+\s|\d+\s)+SS)|((ST. )*(\w+\s|\d+\s)+GS)/g;
