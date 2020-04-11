@@ -125,9 +125,21 @@
                             obj.equipmenttype = $(equipment[j]).children("equipmenttype")[0].textContent;
                             obj.equipmentvoltage = $(equipment[j]).children("equipmentvoltage")[0].textContent;
                             obj.constrainttype = $(equipment[j]).children("constrainttype")[0].textContent;
+
                             var re = /((ST. )*(\w+\s|\d+\s)+TS)|((ST. )*(\w+\s|\d+\s)+SS)|((ST. )*(\w+\s|\d+\s)+GS)/g;
                             var array1 = re.exec(obj.equipmentname);
-                            obj.station = array1[0];
+
+                            if (array1 == null) {
+                                obj.station = null;
+                            } else {
+                                obj.station = array1[0];
+
+                                if (obj.station.includes("MANBY")) {
+
+                                    obj.station = "MANBY TS";
+
+                                };
+                            };
                             
                             outages.push(obj);
                         };
