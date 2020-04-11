@@ -110,7 +110,8 @@
                             equipmentname: null,
                             equipmenttype: null,
                             equipmentvoltage: null,
-                            constrainttype: null
+                            constrainttype: null,
+                            station: null
                         };
 
                         var equipment = $(temp[i]).children("EquipmentRequested");
@@ -124,6 +125,10 @@
                             obj.equipmenttype = $(equipment[j]).children("equipmenttype")[0].textContent;
                             obj.equipmentvoltage = $(equipment[j]).children("equipmentvoltage")[0].textContent;
                             obj.constrainttype = $(equipment[j]).children("constrainttype")[0].textContent;
+                            var re = /((ST. )*(\w+\s|\d+\s)+TS)|((ST. )*(\w+\s|\d+\s)+SS)|((ST. )*(\w+\s|\d+\s)+GS)/g;
+                            var array1 = re.exec(obj.equipmentname);
+                            obj.station = array1[0];
+                            
                             outages.push(obj);
                         };
                     };
