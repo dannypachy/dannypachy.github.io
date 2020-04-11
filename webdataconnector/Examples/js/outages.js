@@ -54,6 +54,10 @@
             id: "constrainttype",
             alias: "Equipment Constraint",
             dataType: tableau.dataTypeEnum.string
+        }, {
+            id: "station",
+            alias: "Station",
+            dataType: tableau.dataTypeEnum.string
         }];
 
         var tableSchema = {
