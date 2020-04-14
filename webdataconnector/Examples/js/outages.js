@@ -292,7 +292,7 @@
                             var re = /((ST. )*(\w+\s|\d+\s)+TS)|((ST. )*(\w+\s|\d+\s)+SS)|((ST. )*(\w+\s|\d+\s)+GS)/g;
                             var array1 = re.exec(obj.equipmentname);
 
-                            //Assignment & special case for Manby TS
+                            //Assignment & special case for Manby TS & Scarboro TS
                             if (array1 == null) {
                                 obj.station = null;
                             } else {
@@ -302,6 +302,9 @@
 
                                     obj.station = "MANBY TS";
 
+                                } else if (obj.station == "SCARBORO TS") {
+
+                                    obj.station = "SCARBOROUGH TS";
                                 };
                             };
 
